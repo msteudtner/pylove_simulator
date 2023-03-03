@@ -71,18 +71,21 @@ my_gate_noise = [
 
 ## Simulation
 
-The most important function is `pylove_simulation` which contains all the relevant functions for simulation.
+The most important function is `pylove_simulation` which contains all the relevant functions for simulation. It uses the stabilizers and the logical operators to fix the initial state. The quantum circuit is then simulated
 
 ```python
 output_state = pylove_simulation(
     stabilizers=stabs,
     logical_operators=log_ops,
     quantum_circuit=circuit,
+    gate_noise=my_gate_noise,
     shots=100
 )
 ```
 
-After the simulation, the resulting object can be manipulated. One can calculate expectation values of observables or simulation fidelities with  
+One also has the option of specifying how many CPUs should be used for parallel processing with the keywork arg `cpus=`.
+
+After the simulation, the resulting `pylove_state` object can be manipulated. One can calculate expectation values of observables or simulation fidelities with the `tr` function
 
 ```python
 tr(output_state, output_state.ideal())
@@ -95,7 +98,7 @@ The simulator is originally intended to be used for studies of quantum error mit
 * full: All syndrome spaces are kept, this is exponentially costly in the rank of the stabilizer group
 * custom: One can specify which syndrome spaces to keep by giving the syndrome patters of the desired subspaces
 
-One can then simulate postselection with the postselect function. The result is a new state with a larger overlap with the ideal state
+One can then simulate postselection with the `postselect` function. The result is a new state with a larger overlap with the ideal state
 
 ```python
 postselected_state = postselect(state=new_graphstate, mode='code')
