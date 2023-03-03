@@ -69,13 +69,6 @@ my_gate_noise = [
     [.998, .001, .001]]
 ```
 
-## Syndrome spaces
-
-The simulator is originally intended to be used for studies of quantum error mitigation in the presence of a collection of $\mathbb{Z}_2$ symmetries or more specifically a stabilizer code. The code enables the simulation of postselection onto different subspaces:
-* codespace: Only the codespace is kept, this is the cheapest simulation in terms of memory
-* full: All syndrome spaces are kept, this is exponentially costly in the rank of the stabilizer group
-* custom: One can specify which syndrome spaces to keep by giving the syndrome patters of the desired subspaces
-
 ## Simulation
 
 The most important function is `pylove_simulation` which contains all the relevant functions for simulation.
@@ -93,6 +86,20 @@ After the simulation, the resulting object can be manipulated. One can calculate
 
 ```python
 tr(output_state, output_state.ideal())
+```
+
+## Syndrome spaces
+
+The simulator is originally intended to be used for studies of quantum error mitigation in the presence of a collection of $\mathbb{Z}_2$ symmetries or more specifically a stabilizer code. The code enables the simulation of postselection onto different subspaces:
+* code: Only the codespace is kept, this is the cheapest simulation in terms of memory
+* full: All syndrome spaces are kept, this is exponentially costly in the rank of the stabilizer group
+* custom: One can specify which syndrome spaces to keep by giving the syndrome patters of the desired subspaces
+
+One can then simulate postselection with the postselect function. The result is a new state with a larger overlap with the ideal state
+
+```python
+postselected_state = postselect(state=new_graphstate, mode='code')
+tr(output_state.ideal(), postselected_state)
 ```
 
 ## Further reference
