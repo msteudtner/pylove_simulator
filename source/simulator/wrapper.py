@@ -10,13 +10,24 @@ import numpy
 
 class pylove_state:
     """
+    Object instance for quantum states with certain stabilizer properties.
+    The stabilizers can be known but the state can be a mixed state of
+    density matrices with any combination of syndromes (sign flips of the
+    stabilizers). The range of syndromes can however also be restricted,
+    as would be the case after postselection experiments. The density matrix
+    could be restricted to only hold states in the code space, or even just
+    pure states of it, stored as vectors. As the stabilizers are known, only
+    the logical representation of the states are stored densely, while
+    stabilizers are stored symbolically along with instructions on how the
+    logical representations are obtained.
+
     Attributes:
         state:
 
             Returns the reconstructed density matrix.
 
             If `self.mode == 'all'`, the output is an array of the shape
-            `( *A, *B)`, where <A = (2, 2, 2, ... , 2)> and
+            `( *A, *B)`, where `A = (2, 2, 2, ... , 2)` and
             `B = (2 ** n, 2 ** n)` with `n = self.n_log_qubits` being the
             number of logical qubits. The idea is that this matrix prompts a
             density matrix block associated with a syndrome pattern, a tuple
@@ -33,7 +44,8 @@ class pylove_state:
             but updated to fit the set of stabilizer generators in
             `self.stabs`.
 
-            If `self.mode == 'vector'`, the output is `numpy.ndarray` vector.
+            If `self.mode == 'vector'`, the output is a `numpy.ndarray`
+            vector.
 
         mode:
 
@@ -94,13 +106,21 @@ class pylove_state:
 
         other_ops:
 
-            String of characters `'X'`, `'Y'` and `'Z'` indicating the
+            String of characters `'X'`, `'Y'` and `'Z'` indicating
             the type of Pauli operators fixed by each stabilizer, in addition
             to `fixed_ops`. To remove the `n`th qubit from a physical
             operator, it must act trivially on the `n`th qubit. That is, it
             must act as either the identity or `P`, where
             `(P, self.fixed_ops[n], self.other_ops[n])`is a permutation
             of `('X', 'Y', 'Z')`.
+    
+    Methods:
+
+        ideal:
+            Creates a `pylove_state` instance of the current instance's ideal
+            version; the state returned by the noiseless version of the
+            quantum circuit. 
+
     """
 
     def __init__(
@@ -135,7 +155,15 @@ class pylove_state:
         """
         Creates a `pylove_state` instance of the current instance's ideal
         version; the state returned by the noiseless version of the
-        quantum circuit. 
+        quantum circuit.
+        Args:
+            self:
+                Current `pylove_state` instance.
+
+        Returns:
+            (pylove_state):
+                New `pylove_state` instance with `mode=vector`.
+
         """
         return pylove_state(
             self.ideal_state,
@@ -162,8 +190,36 @@ def pylove_simulation(
         mode: str = 'code',
         block_numbers: Sequence = (),
         queue_size: int = 100,
-        num_processes: int = 0):
+        num_processes: int = 0) -> pylove_state:
     """
+    Simulates a physical quantum circuit acting on quantum state with
+    stabilizers under Pauli noise. In this simulator, noise operators are
+    statistically placed in and around circuit subroutines
+    (according to the noise model), and symbolically reduced to their logical
+    representation: Pauli strings on the computational state space.
+    Logical state vectors and syndrome patterns constitute shots with which
+    the density matrix is reconstructed. The density matrix itself is block
+    diagonal with respect to stabilizer states of different syndrome patterns,
+    including the code space. The simulation can save any number of these
+    blocks corresponding to different syndrome numbers. Perfect postselection
+    for instance would only require to keep the code space block and the rest
+    can be discarded. The states in every block are logical states of the
+    stabilizer state corresponding to their syndrome pattern.
+
+    The simulated circuit has two parts, a time evolution / ansatz circuit
+    featuring Pauli string rotation subcircuits and a state preparation
+    routine featuring subcircuits for projective measurements. Besides the
+    stabilizer generators that constrain the system at every point in the
+    circuit, the system is additionally constrained by a number of logical
+    operators (signed Pauli strings) after the state preparation circuit.
+    This extended list of stabilizer generators constrains the state
+    completely, meaning there are as many extended stabilizer generators
+    as there are physical qubits and the computational subspace has zero
+    degrees of freedom. It is possible within this simulator to give the
+    state preparation circuit an entirely new pattern of projective
+    measurements, as long as they span the same eigenspace as the original
+    stabilizers and logical operators.
+
     Args:
 
         stabilizers (QubitOperator or list):
@@ -322,7 +378,7 @@ def pylove_simulation(
 def tr(
         arg1: Union[QubitOperator, pylove_state],
         arg2: Union[QubitOperator, pylove_state] = QubitOperator(())
-        ) -> float:
+        ) -> complex:
     """
     Trace of a density matrix with an operator (outputting an expectation
     value) or an ideal state (outputting a fidelity).
@@ -445,7 +501,7 @@ def tr(
 def postselect(
         state: pylove_state,
         mode: str,
-        block_numbers: Sequence = []):
+        block_numbers: Sequence = []) -> pylove_state:
     """
     Restricting a state to a specified set of density matrix sub-blocks,
     equivalent to a post-selection experiment.

@@ -66,20 +66,20 @@ def fidelity(
 
     # state 1 is a vector and state 2 a density matrix
     elif check_states == (True, False):
-        return sqrt(abs(state1.conj() @ state2 @ state1))
+        return sqrt(numpy.real(state1.conj() @ state2 @ state1))
 
     # state 1 is a density matrix and state 2 a vector
     elif check_states == (False, True):
-        return sqrt(abs(state2.conj() @ state1 @ state2))
+        return sqrt(numpy.real(state2.conj() @ state1 @ state2))
 
     # both states are density matrices
     else:
         return (
-            abs(
+            numpy.real(
                 numpy.trace(
                     sqrtm(
                         sqrtm(state1) @
-                        state2 @
+                        sqrtm(state2) @
                         sqrtm(state1)))))
 
 

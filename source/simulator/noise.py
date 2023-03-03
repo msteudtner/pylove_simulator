@@ -116,54 +116,6 @@ def single_qubit_depolarizing(rate: float) -> list:
              QubitOperator('Z0')],
             [1 - 3 * rate / 4, rate / 4, rate / 4, rate / 4]]
 
-def parallel_single_qubit_depolarizing(rate: float) -> list:
-    """
-    A pair of single-qubit depolarizing channels acting in parallel.
-
-        Args:
-              rate (float): Noise rate of the channel.
-
-        Returns:
-              (list): noise format for the simulator
-    """
-
-    if rate > 1 or rate < 0:
-        raise NoiseError('Error rate expected to be between 0 and 1,' +
-                         ' but is ' + str(rate))
-
-    return [[QubitOperator(()),
-             QubitOperator('X0'),
-             QubitOperator('Y0'),
-             QubitOperator('Z0'),
-             QubitOperator('X1'),
-             QubitOperator('Y1'),
-             QubitOperator('Z1'),
-             QubitOperator('X0 X1'),
-             QubitOperator('X0 Y1'),
-             QubitOperator('X0 Z1'),
-             QubitOperator('Y0 X1'),
-             QubitOperator('Y0 Y1'),
-             QubitOperator('Y0 Z1'),
-             QubitOperator('Z0 X1'),
-             QubitOperator('Z0 Y1'),
-             QubitOperator('Z0 Z1'),],
-            [(1 - 3 * rate / 4)**2, 
-            (rate / 4)*(1 - 3 * rate / 4), 
-            (rate / 4)*(1 - 3 * rate / 4), 
-            (rate / 4)*(1 - 3 * rate / 4),
-            (rate / 4)*(1 - 3 * rate / 4),
-            (rate / 4)*(1 - 3 * rate / 4),
-            (rate / 4)*(1 - 3 * rate / 4),
-            (rate / 4)**2,
-            (rate / 4)**2,
-            (rate / 4)**2,
-            (rate / 4)**2,
-            (rate / 4)**2,
-            (rate / 4)**2,
-            (rate / 4)**2,
-            (rate / 4)**2,
-            (rate / 4)**2,]]
-
 
 def two_qubit_depolarizing(rate: float) -> list:
     """

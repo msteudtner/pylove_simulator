@@ -948,8 +948,8 @@ def logical_state_simulation(
     Simulates a physical quantum circuit acting on quantum state with
     stabilizers under Pauli noise. In this simulator, noise operators are
     statistically placed in and around circuit subroutines, and
-    symbolically reduced to their impact on the computational state space
-    and the computational state's stabilizers. Logical state vectors and
+    symbolically reduced to their logical representation: Pauli strings on
+    the computational state space. Logical state vectors and
     syndrome patterns constitute shots with which the density matrix is
     reconstructed. The density matrix itself is block diagonal with
     respect to stabilizer states of different syndrome patterns, including the
@@ -973,7 +973,7 @@ def logical_state_simulation(
     measurements, as long as they span the same eigenspace as the original
     stabilizers and logical operators.
 
-    The computation of the simulation results is parallelized where it can,
+    The computation of the simulation results is parallelized where possible,
     and the returns include technical data for further analysis.
 
     Args:
@@ -1420,7 +1420,7 @@ def logical_state_simulation(
                                 phys_circuit,
                                 n_phys_qubits, 'rot')
 
-    depth = (init_depth,circ_depth)
+    depth = init_depth + circ_depth
 
     # the syndromes of the measured Pauli strings needs to be handed
     #  down to the syndromes properly. Obtain a rudimentary state, that
